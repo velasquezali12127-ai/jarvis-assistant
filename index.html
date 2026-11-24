@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS - Stark Industries</title>
+
+<style>
+:root {
+  --gold: #ffc94a;
+  --light: #fff0ad;
+  --dim: #9b7228;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--gold);
+  background: radial-gradient(ellipse at center, #34240b, #100e08 45%, #030403);
+  font-family: Arial, sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .2;
+  background-image:
+    linear-gradient(#a77c2520 1px, transparent 1px),
+    linear-gradient(90deg, #a77c2520 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+header {
+  text-align: center;
+  padding: 22px 10px 8px;
+  font-size: 10px;
+  letter-spacing: 5px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 30px;
+  letter-spacing: 10px;
+  text-shadow: 0 0 20px var(--gold);
+}
+
+.status {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffe38a;
+  box-shadow: 0 0 12px var(--gold);
+}
+
+.clock {
+  text-align: center;
+  font-size: 25px;
+  letter-spacing: 5px;
+  margin: 20px;
+  color: var(--light);
+}
+
+.reactor {
+  width: 220px;
+  height: 220px;
+  margin: 25px auto;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.ring {
+  position: absolute;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 12px #d99500;
+}
+
+.r1 {
+  inset: 0;
+  border-style: dashed;
+  animation: rotate 20s linear infinite;
+}
+
+.r2 {
+  inset: 17px;
+  border-width: 2px;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  animation: rotate 8s linear infinite reverse;
+}
+
+.r3 {
+  inset: 38px;
+  border: 3px double var(--light);
+  animation: rotate 15s linear infinite;
+}
+
+.core {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffde0, #ffe38a 35%, #d99820 70%);
+  box-shadow: 0 0 20px #fff0ad, 0 0 55px var(--gold);
+  animation: pulse 3s infinite;
+}
+
+@keyframes rotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.12); opacity: .7; }
+}
+
+main {
+  max-width: 650px;
+  margin: auto;
+  padding: 10px 15px 30px;
+}
+
+.panel {
+  border: 1px solid #9b722866;
+  background: #171307eF;
+  padding: 17px;
+  margin: 15px 0;
+  box-shadow: 0 0 15px #000;
+}
+
+.panel-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--light);
+  margin-bottom: 17px;
+}
+
+.data {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #8c681d33;
+  font-size: 11px;
+}
+
+.value {
+  color: var(--light);
+  text-align: right;
+}
+
+.available { color: #aaff9b; }
+.unavailable { color: #d9a34c; }
+
+button {
+  display: block;
+  margin: 18px auto;
+  padding: 14px 22px;
+  background: #59400a;
+  border: 1px solid var(--gold);
+  color: var(--light);
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.mic-button {
+  background: linear-gradient(135deg, #3b2a08, #a87513, #3b2a08);
+  border: 1px solid #ffe38a;
+  color: #fff0ad;
+  box-shadow: 0 0 12px #ffc94a88, inset 0 0 10px #ffc94a33;
+  border-radius: 8px;
+  padding: 15px 24px;
+  font-weight: bold;
+  transition: .3s;
+}
+
+.mic-button:active {
+  box-shadow: 0 0 25px #ffc94a;
+  transform: scale(.96);
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #806020;
+}
+</style>
+</head>
+
+<body>
+
+<header>STARK INDUSTRIES · ADVANCED SYSTEMS</header>
+
+<h1>J.A.R.V.I.S.</h1>
+
+<div class="status">
+  <span class="dot"></span>
+  SISTEMA DE MONITOREO
+</div>
+
+<div class="clock" id="clock">--:--:--</div>
+
+<div class="reactor">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="core"></div>
+</div>
+
+<main>
+
+<section class="panel">
+  <div class="panel-title">DIAGNÓSTICO DEL DISPOSITIVO</div>
+
+  <div class="data">
+    <span>BATERÍA</span>
+    <span class="value" id="battery">Consultando...</span>
+  </div>
+
+  <div class="data">
+    <span>ESTADO DE CARGA</span>
+    <span class="value" id="charging">Consultando...</span>
+  </div>
+
+  <div class="data">
+    <span>INTERNET</span>
+    <span class="value" id="internet">Consultando...</span>
+  </div>
+
+  <div class="data">
+    <span>TIPO DE CONEXIÓN</span>
+    <span class="value" id="connection">Consultando...</span>
+  </div>
+
+  <div class="data">
+    <span>NÚCLEOS INFORMADOS</span>
+    <span class="value" id="cores">Consultando...</span>
+  </div>
+
+  <div class="data">
+    <span>MEMORIA DEL DISPOSITIVO</span>
+    <span class="value" id="memory">Consultando...</span>
+  </div>
+
+  <button onclick="actualizarDatos()">
+    ACTUALIZAR DIAGNÓSTICO
+  </button>
+</section>
+
+<section class="panel">
+  <div class="panel-title">ASISTENTE PERSONAL</div>
+
+  <p id="message">
+    Esperando instrucciones, señor Alí.
+  </p>
+
+  <button class="mic-button" onclick="escuchar()">
+  🎙 ACTIVAR MICRÓFONO
+  </button>
+</section>
+
+</main>
+
+<footer>
+  JARVIS AI · STARK INDUSTRIES
+</footer>
+
+<script>
+function actualizarReloj() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString("es-PE", {
+      hour12: false
+    });
+}
+
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+
+function mostrar(id, valor, disponible = true) {
+  const elemento = document.getElementById(id);
+  elemento.textContent = valor;
+  elemento.className = "value " +
+    (disponible ? "available" : "unavailable");
+}
+
+async function consultarBateria() {
+  if (!("getBattery" in navigator)) {
+    mostrar("battery", "No disponible", false);
+    mostrar("charging", "No disponible", false);
+    return;
+  }
+
+  try {
+    const bateria = await navigator.getBattery();
+
+    function actualizar() {
+      mostrar("battery",
+        Math.round(bateria.level * 100) + "%");
+
+      mostrar("charging",
+        bateria.charging ? "Cargando" : "Sin cargar");
+    }
+
+    actualizar();
+
+    bateria.addEventListener("levelchange", actualizar);
+    bateria.addEventListener("chargingchange", actualizar);
+
+  } catch {
+    mostrar("battery", "Acceso no permitido", false);
+    mostrar("charging", "Acceso no permitido", false);
+  }
+}
+
+function consultarInternet() {
+  const conectado = navigator.onLine;
+
+  mostrar("internet",
+    conectado ? "Conectado" : "Desconectado",
+    conectado);
+
+  if (!conectado) {
+    mostrar("connection", "Sin conexión", false);
+    return;
+  }
+
+  const red = navigator.connection ||
+              navigator.mozConnection ||
+              navigator.webkitConnection;
+
+  if (red && red.effectiveType) {
+    mostrar("connection", red.effectiveType.toUpperCase());
+  } else {
+    mostrar("connection", "Tipo no disponible", false);
+  }
+}
+
+function consultarHardware() {
+  if (navigator.hardwareConcurrency) {
+    mostrar("cores",
+      navigator.hardwareConcurrency + " núcleos");
+  } else {
+    mostrar("cores", "No disponible", false);
+  }
+
+  if (navigator.deviceMemory) {
+    mostrar("memory",
+      "Aprox. " + navigator.deviceMemory + " GB");
+  } else {
+    mostrar("memory", "No disponible", false);
+  }
+}
+
+function actualizarDatos() {
+  consultarBateria();
+  consultarInternet();
+  consultarHardware();
+}
+
+window.addEventListener("online", consultarInternet);
+window.addEventListener("offline", consultarInternet);
+
+actualizarDatos();
+
+function hablar() {
+  const mensaje = "A sus órdenes, señor Alí. Sistemas funcionando.";
+  document.getElementById("message").textContent = mensaje;
+
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+    const voz = new SpeechSynthesisUtterance(mensaje);
+    voz.lang = "es-ES";
+    voz.rate = 0.9;
+    voz.pitch = 0.75;
+    speechSynthesis.speak(voz);
+  }
+}
+function escuchar() {
+  const Reconocimiento =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  const mensaje = document.getElementById("message");
+
+  if (!Reconocimiento) {
+    mensaje.textContent = "ERROR: Chrome no admite SpeechRecognition";
+    return;
+  }
+
+  const microfono = new Reconocimiento();
+
+  microfono.lang = "es-PE";
+  microfono.continuous = false;
+  microfono.interimResults = false;
+
+  microfono.onstart = function() {
+    mensaje.textContent = "JARVIS TE ESTÁ ESCUCHANDO...";
+  };
+
+  microfono.onresult = function(event) {
+    const texto = event.results[0][0].transcript;
+    mensaje.textContent = "TE ESCUCHÉ: " + texto;
+  };
+
+  microfono.onerror = function(event) {
+    mensaje.textContent = "ERROR DETECTADO: " + event.error;
+  };
+
+  microfono.onend = function() {
+    console.log("Micrófono finalizado");
+  };
+
+  microfono.start();
+}
+</script>
+</body>
+</html>
